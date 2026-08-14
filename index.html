@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vakit — Dünya Namaz Vakitleri</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-deep:#0a1c22;
+    --bg-deep-2:#0d2830;
+    --panel:#123138;
+    --panel-2:#16383f;
+    --line:#25525a;
+    --gold:#cba135;
+    --gold-soft:#e8c766;
+    --text:#f3ede0;
+    --text-muted:#9fc0bf;
+    --text-dim:#5f8788;
+    --shadow: 0 20px 50px rgba(0,0,0,0.45);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(ellipse 120% 60% at 50% -10%, #163b41 0%, transparent 60%),
+      linear-gradient(180deg, var(--bg-deep) 0%, var(--bg-deep-2) 100%);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+    position:relative;
+    overflow-x:hidden;
+  }
+  #stars{
+    position:fixed; inset:0; pointer-events:none; z-index:0;
+  }
+  .star{
+    position:absolute; width:2px; height:2px; background:var(--gold-soft);
+    border-radius:50%; opacity:0.5;
+    animation: twinkle 4s ease-in-out infinite;
+  }
+  @keyframes twinkle{
+    0%,100%{opacity:0.15;}
+    50%{opacity:0.85;}
+  }
+  .wrap{
+    position:relative; z-index:1;
+    max-width:980px; margin:0 auto; padding:48px 24px 80px;
+  }
+
+  /* ---------- Header ---------- */
+  header{
+    text-align:center; margin-bottom:40px;
+  }
+  .crescent{
+    width:56px; height:56px; margin:0 auto 18px;
+    position:relative;
+  }
+  .crescent::before{
+    content:"";
+    position:absolute; inset:0;
+    border-radius:50%;
+    background:var(--gold-soft);
+    box-shadow: -14px 0 0 -2px var(--bg-deep-2), 0 0 24px rgba(232,199,102,0.35);
+    -webkit-mask: radial-gradient(circle 24px at 62% 50%, transparent 98%, #000 100%);
+    mask: radial-gradient(circle 24px at 62% 50%, transparent 98%, #000 100%);
+  }
+  .crescent-svg{width:56px;height:56px;display:block;margin:0 auto 18px;filter:drop-shadow(0 0 10px rgba(232,199,102,0.35));}
+  h1{
+    font-family:'Amiri',serif; font-weight:700; font-style:italic;
+    font-size:clamp(32px,5vw,48px); margin:0 0 6px; letter-spacing:0.5px;
+    color:var(--gold-soft);
+  }
+  .sub{
+    color:var(--text-muted); font-size:14px; letter-spacing:2px; text-transform:uppercase;
+  }
+  .dates{
+    margin-top:18px; font-family:'Space Mono',monospace; font-size:13px;
+    color:var(--text-dim);
+    display:flex; gap:18px; justify-content:center; flex-wrap:wrap;
+  }
+  .dates span b{color:var(--text-muted); font-weight:400;}
+
+  /* ---------- Selector panel ---------- */
+  .selector{
+    background:linear-gradient(180deg, var(--panel), var(--panel-2));
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:26px;
+    box-shadow:var(--shadow);
+    display:grid;
+    grid-template-columns:1fr 1fr auto;
+    gap:16px;
+    align-items:end;
+  }
+  @media (max-width:640px){
+    .selector{grid-template-columns:1fr;}
+  }
+  .field label{
+    display:block; font-size:11px; letter-spacing:1.5px; text-transform:uppercase;
+    color:var(--text-dim); margin-bottom:8px;
+  }
+  select, input[type="text"]{
+    width:100%; background:var(--bg-deep); border:1px solid var(--line);
+    color:var(--text); padding:12px 14px; border-radius:10px; font-size:15px;
+    font-family:'Inter',sans-serif;
+    appearance:none; outline:none;
+    transition:border-color .15s ease;
+  }
+  select:focus, input[type="text"]:focus{border-color:var(--gold);}
+  select{
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239fc0bf' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+    background-repeat:no-repeat; background-position:right 14px center;
+    padding-right:34px;
+  }
+  button.go{
+    background:linear-gradient(180deg, var(--gold-soft), var(--gold));
+    color:#12242a; border:none; font-weight:700; font-size:14px;
+    padding:13px 26px; border-radius:10px; cursor:pointer;
+    letter-spacing:0.5px;
+    transition:transform .15s ease, box-shadow .15s ease;
+    white-space:nowrap;
+  }
+  button.go:hover{transform:translateY(-1px); box-shadow:0 8px 20px rgba(203,161,53,0.35);}
+  button.go:active{transform:translateY(0);}
+  button.go:disabled{opacity:0.5; cursor:not-allowed; transform:none; box-shadow:none;}
+  button.go:focus-visible, select:focus-visible, input:focus-visible{outline:2px solid var(--gold-soft); outline-offset:2px;}
+
+  .method-row{
+    margin-top:14px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+    font-size:12px; color:var(--text-dim);
+  }
+  .method-row select{width:auto; padding:6px 28px 6px 10px; font-size:12px; border-radius:8px;}
+
+  /* ---------- Status ---------- */
+  .status{
+    text-align:center; margin:28px 0; color:var(--text-muted); font-size:14px;
+    min-height:20px;
+  }
+  .status.error{color:#e08a6b;}
+
+  /* ---------- Next prayer banner ---------- */
+  .next-banner{
+    display:none;
+    margin:32px auto 0; text-align:center;
+    border-top:1px solid var(--line); border-bottom:1px solid var(--line);
+    padding:22px 0;
+  }
+  .next-banner.show{display:block;}
+  .next-banner .label{font-size:12px; letter-spacing:2px; text-transform:uppercase; color:var(--text-dim);}
+  .next-banner .name{font-family:'Amiri',serif; font-style:italic; font-size:30px; color:var(--gold-soft); margin:4px 0;}
+  .next-banner .countdown{font-family:'Space Mono',monospace; font-size:15px; color:var(--text-muted);}
+
+  /* ---------- Day arc ---------- */
+  .arc-wrap{
+    display:none;
+    margin:36px 0 8px; position:relative; height:90px;
+  }
+  .arc-wrap.show{display:block;}
+  .arc-line{
+    position:absolute; top:50%; left:0; right:0; height:1px;
+    background:linear-gradient(90deg, transparent, var(--line) 8%, var(--line) 92%, transparent);
+  }
+  .arc-marker{
+    position:absolute; top:50%; transform:translate(-50%,-50%);
+    width:9px; height:9px; border-radius:50%;
+    background:var(--panel-2); border:1px solid var(--gold);
+  }
+  .arc-marker .tag{
+    position:absolute; top:16px; left:50%; transform:translateX(-50%);
+    font-size:10px; letter-spacing:0.5px; color:var(--text-dim); white-space:nowrap;
+  }
+  .arc-marker.active{background:var(--gold);}
+  .arc-marker.active .tag{color:var(--gold-soft);}
+  .arc-sun{
+    position:absolute; top:50%; width:14px; height:14px; border-radius:50%;
+    background:radial-gradient(circle, var(--gold-soft), var(--gold));
+    box-shadow:0 0 16px 4px rgba(232,199,102,0.5);
+    transform:translate(-50%,-50%);
+    transition:left 1s linear;
+  }
+
+  /* ---------- Prayer cards (arch shape) ---------- */
+  .cards{
+    display:none;
+    margin-top:52px;
+    display:grid;
+    grid-template-columns:repeat(6,1fr);
+    gap:14px;
+  }
+  .cards.show{display:grid;}
+  @media (max-width:900px){ .cards{grid-template-columns:repeat(3,1fr);} }
+  @media (max-width:520px){ .cards{grid-template-columns:repeat(2,1fr);} }
+
+  .arch{
+    background:linear-gradient(180deg, var(--panel), var(--panel-2));
+    border:1px solid var(--line);
+    border-top-left-radius:70px;
+    border-top-right-radius:70px;
+    border-bottom-left-radius:10px;
+    border-bottom-right-radius:10px;
+    padding:26px 10px 18px;
+    text-align:center;
+    position:relative;
+    transition:border-color .2s ease, transform .2s ease;
+  }
+  .arch.current{
+    border-color:var(--gold);
+    transform:translateY(-4px);
+    box-shadow:0 12px 28px rgba(203,161,53,0.25);
+  }
+  .arch .name{
+    font-family:'Amiri',serif; font-style:italic; font-size:16px;
+    color:var(--gold-soft); margin-bottom:8px;
+  }
+  .arch .time{
+    font-family:'Space Mono',monospace; font-size:19px; color:var(--text);
+    letter-spacing:1px;
+  }
+  .arch .pip{
+    position:absolute; top:12px; left:50%; transform:translateX(-50%);
+    width:5px; height:5px; border-radius:50%; background:var(--line);
+  }
+  .arch.current .pip{background:var(--gold);}
+
+  footer{
+    text-align:center; margin-top:70px; color:var(--text-dim); font-size:11px;
+    letter-spacing:1px;
+  }
+  footer a{color:var(--text-dim);}
+
+  @media (prefers-reduced-motion: reduce){
+    .star{animation:none;}
+    .arc-sun{transition:none;}
+    .arch{transition:none;}
+  }
+</style>
+</head>
+<body>
+
+<div id="stars"></div>
+
+<div class="wrap">
+  <header>
+    <svg class="crescent-svg" viewBox="0 0 56 56" fill="none">
+      <path d="M38 6C29 9 23 17.5 23 28s6 19 15 22c-3.3 1.3-7 2-11 2C13.5 52 3 41.5 3 28S13.5 4 27 4c4 0 7.7.7 11 2z" fill="#e8c766"/>
+    </svg>
+    <h1>Vakit</h1>
+    <div class="sub">Dünya Namaz Vakitleri</div>
+    <div class="dates" id="dateRow"></div>
+  </header>
+
+  <div class="selector">
+    <div class="field">
+      <label for="country">Ülke</label>
+      <select id="country"></select>
+    </div>
+    <div class="field">
+      <label for="city">Bölge / Şehir</label>
+      <input type="text" id="city" list="cityList" placeholder="Örn. İstanbul" autocomplete="off">
+      <datalist id="cityList"></datalist>
+    </div>
+    <button class="go" id="goBtn">Vakitleri Getir</button>
+  </div>
+  <div class="method-row">
+    <span>Hesaplama yöntemi</span>
+    <select id="method">
+      <option value="13">Diyanet (Türkiye)</option>
+      <option value="4">Ümmü'l-Kura (Suudi Arabistan)</option>
+      <option value="3">Mısır Genel Otoritesi</option>
+      <option value="2">ISNA (Kuzey Amerika)</option>
+      <option value="5">Mısır Araştırma Kurumu</option>
+      <option value="1">Karaçi Üniversitesi</option>
+    </select>
+  </div>
+
+  <div class="status" id="status"></div>
+
+  <div class="next-banner" id="nextBanner">
+    <div class="label">Sıradaki Vakit</div>
+    <div class="name" id="nextName">—</div>
+    <div class="countdown" id="nextCountdown">—</div>
+  </div>
+
+  <div class="arc-wrap" id="arcWrap">
+    <div class="arc-line"></div>
+    <div id="arcMarkers"></div>
+    <div class="arc-sun" id="arcSun" style="left:0%"></div>
+  </div>
+
+  <div class="cards" id="cards"></div>
+
+  <footer>Vakitler <a href="https://aladhan.com/prayer-times-api" target="_blank" rel="noopener">Al Adhan API</a> ile hesaplanır · Şehir bulunamazsa yazımı kontrol edin</footer>
+</div>
+
+<script>
+/* ---------------- Stars background ---------------- */
+(function(){
+  const starsEl = document.getElementById('stars');
+  const n = 70;
+  for(let i=0;i<n;i++){
+    const s = document.createElement('div');
+    s.className = 'star';
+    s.style.top = Math.random()*100 + '%';
+    s.style.left = Math.random()*100 + '%';
+    s.style.animationDelay = (Math.random()*4) + 's';
+    s.style.opacity = (0.15 + Math.random()*0.5).toFixed(2);
+    starsEl.appendChild(s);
+  }
+})();
+
+/* ---------------- Country list (code -> Turkish name) ---------------- */
+const COUNTRIES = [
+["TR","Türkiye"],["US","Amerika Birleşik Devletleri"],["GB","Birleşik Krallık"],["DE","Almanya"],
+["FR","Fransa"],["NL","Hollanda"],["BE","Belçika"],["AT","Avusturya"],["CH","İsviçre"],["IT","İtalya"],
+["ES","İspanya"],["PT","Portekiz"],["SE","İsveç"],["NO","Norveç"],["DK","Danimarka"],["FI","Finlandiya"],
+["PL","Polonya"],["CZ","Çekya"],["RO","Romanya"],["BG","Bulgaristan"],["GR","Yunanistan"],["HU","Macaristan"],
+["IE","İrlanda"],["RU","Rusya"],["UA","Ukrayna"],["BY","Belarus"],
+["SA","Suudi Arabistan"],["AE","Birleşik Arap Emirlikleri"],["QA","Katar"],["KW","Kuveyt"],["BH","Bahreyn"],
+["OM","Umman"],["JO","Ürdün"],["LB","Lübnan"],["IQ","Irak"],["SY","Suriye"],["YE","Yemen"],["IL","İsrail"],
+["PS","Filistin"],["EG","Mısır"],["LY","Libya"],["TN","Tunus"],["DZ","Cezayir"],["MA","Fas"],["SD","Sudan"],
+["MR","Moritanya"],["SO","Somali"],["DJ","Cibuti"],["KM","Komorlar"],
+["IR","İran"],["AF","Afganistan"],["PK","Pakistan"],["IN","Hindistan"],["BD","Bangladeş"],["LK","Sri Lanka"],
+["NP","Nepal"],["BT","Butan"],["MV","Maldivler"],
+["CN","Çin"],["JP","Japonya"],["KR","Güney Kore"],["KP","Kuzey Kore"],["MN","Moğolistan"],["TW","Tayvan"],
+["HK","Hong Kong"],
+["ID","Endonezya"],["MY","Malezya"],["SG","Singapur"],["BN","Brunei"],["PH","Filipinler"],["TH","Tayland"],
+["VN","Vietnam"],["MM","Myanmar"],["KH","Kamboçya"],["LA","Laos"],
+["KZ","Kazakistan"],["UZ","Özbekistan"],["TM","Türkmenistan"],["TJ","Tacikistan"],["KG","Kırgızistan"],
+["AZ","Azerbaycan"],["GE","Gürcistan"],["AM","Ermenistan"],
+["NG","Nijerya"],["ZA","Güney Afrika"],["KE","Kenya"],["ET","Etiyopya"],["GH","Gana"],["TZ","Tanzanya"],
+["UG","Uganda"],["SN","Senegal"],["ML","Mali"],["NE","Nijer"],["TD","Çad"],["CM","Kamerun"],["CI","Fildişi Sahili"],
+["ZM","Zambiya"],["ZW","Zimbabve"],["MZ","Mozambik"],["AO","Angola"],["RW","Ruanda"],["BF","Burkina Faso"],
+["CA","Kanada"],["MX","Meksika"],["BR","Brezilya"],["AR","Arjantin"],["CL","Şili"],["CO","Kolombiya"],
+["PE","Peru"],["VE","Venezuela"],["CU","Küba"],
+["AU","Avustralya"],["NZ","Yeni Zelanda"],["FJ","Fiji"],
+["AL","Arnavutluk"],["XK","Kosova"],["MK","Kuzey Makedonya"],["RS","Sırbistan"],["BA","Bosna Hersek"],
+["ME","Karadağ"],["HR","Hırvatistan"],["SI","Slovenya"],["SK","Slovakya"],["LT","Litvanya"],["LV","Letonya"],
+["EE","Estonya"],["CY","Kıbrıs"]
+];
+
+/* Curated major cities for a good subset of countries (used as autocomplete hints) */
+const CITY_HINTS = {
+  TR:["İstanbul","Ankara","İzmir","Bursa","Antalya","Konya","Adana","Gaziantep","Şanlıurfa","Kayseri","Trabzon","Van","Diyarbakır","Samsun"],
+  US:["New York","Los Angeles","Chicago","Houston","Dallas","Detroit","San Francisco","Washington"],
+  GB:["London","Birmingham","Manchester","Leeds","Glasgow","Bradford"],
+  DE:["Berlin","Munich","Hamburg","Cologne","Frankfurt","Stuttgart"],
+  FR:["Paris","Marseille","Lyon","Strasbourg","Lille"],
+  SA:["Mecca","Medina","Riyadh","Jeddah","Dammam"],
+  AE:["Dubai","Abu Dhabi","Sharjah","Ajman"],
+  EG:["Cairo","Alexandria","Giza","Luxor"],
+  ID:["Jakarta","Surabaya","Bandung","Medan","Yogyakarta"],
+  PK:["Karachi","Lahore","Islamabad","Faisalabad"],
+  IN:["Delhi","Mumbai","Hyderabad","Bangalore","Lucknow"],
+  MY:["Kuala Lumpur","Johor Bahru","Penang","Ipoh"],
+  MA:["Casablanca","Rabat","Fes","Marrakesh"],
+  DZ:["Algiers","Oran","Constantine"],
+  IQ:["Baghdad","Basra","Mosul","Erbil"],
+  JO:["Amman","Zarqa","Irbid"],
+  NL:["Amsterdam","Rotterdam","The Hague","Utrecht"],
+  RU:["Moscow","Saint Petersburg","Kazan"],
+  QA:["Doha"],
+  KW:["Kuwait City"],
+  BD:["Dhaka","Chittagong"],
+  NG:["Lagos","Abuja","Kano"],
+  ZA:["Cape Town","Johannesburg","Durban"],
+  CA:["Toronto","Montreal","Vancouver","Ottawa"],
+  AU:["Sydney","Melbourne","Brisbane","Perth"],
+  AZ:["Baku"],
+  KZ:["Almaty","Astana"],
+  BA:["Sarajevo"],
+  AL:["Tirana"],
+  XK:["Pristina"]
+};
+
+/* ---------------- Populate selects ---------------- */
+const countrySel = document.getElementById('country');
+const placeholder = document.createElement('option');
+placeholder.textContent = 'Ülke seçin…';
+placeholder.value = '';
+placeholder.disabled = true; placeholder.selected = true;
+countrySel.appendChild(placeholder);
+
+COUNTRIES.sort((a,b)=>a[1].localeCompare(b[1],'tr')).forEach(([code,name])=>{
+  const o = document.createElement('option');
+  o.value = code; o.textContent = name;
+  countrySel.appendChild(o);
+});
+// default to Türkiye
+countrySel.value = 'TR';
+
+const cityInput = document.getElementById('city');
+const cityList = document.getElementById('cityList');
+function refreshCityHints(){
+  cityList.innerHTML = '';
+  const code = countrySel.value;
+  const hints = CITY_HINTS[code] || [];
+  hints.forEach(c=>{
+    const o = document.createElement('option');
+    o.value = c;
+    cityList.appendChild(o);
+  });
+}
+countrySel.addEventListener('change', refreshCityHints);
+refreshCityHints();
+cityInput.value = 'İstanbul';
+
+/* ---------------- Header dates ---------------- */
+function renderHeaderDates(hijri, gregorianReadable){
+  const el = document.getElementById('dateRow');
+  el.innerHTML = '';
+  const g = document.createElement('span');
+  g.innerHTML = '<b>Miladi</b> ' + gregorianReadable;
+  const h = document.createElement('span');
+  h.innerHTML = hijri ? ('<b>Hicri</b> ' + hijri) : '';
+  el.appendChild(g);
+  if(hijri) el.appendChild(h);
+}
+renderHeaderDates(null, new Date().toLocaleDateString('tr-TR', {day:'numeric', month:'long', year:'numeric', weekday:'long'}));
+
+/* ---------------- Prayer name map ---------------- */
+const PRAYER_ORDER = ['Imsak','Sunrise','Dhuhr','Asr','Maghrib','Isha'];
+const PRAYER_LABEL = {
+  Imsak:'İmsak', Sunrise:'Güneş', Dhuhr:'Öğle', Asr:'İkindi', Maghrib:'Akşam', Isha:'Yatsı'
+};
+
+let countdownTimer = null;
+let sunTimer = null;
+
+const statusEl = document.getElementById('status');
+const cardsEl = document.getElementById('cards');
+const arcWrap = document.getElementById('arcWrap');
+const arcMarkers = document.getElementById('arcMarkers');
+const arcSun = document.getElementById('arcSun');
+const nextBanner = document.getElementById('nextBanner');
+const nextName = document.getElementById('nextName');
+const nextCountdown = document.getElementById('nextCountdown');
+const goBtn = document.getElementById('goBtn');
+
+function clean(str){ return (str||'').split(' ')[0]; } // strip timezone suffix e.g. "05:12 (+03)"
+
+function minutesOf(hhmm){
+  const [h,m] = hhmm.split(':').map(Number);
+  return h*60+m;
+}
+
+async function fetchTimes(){
+  const code = countrySel.value;
+  const countryName = countrySel.options[countrySel.selectedIndex]?.textContent || '';
+  const city = cityInput.value.trim();
+  const method = document.getElementById('method').value;
+
+  if(!code){ statusEl.textContent = 'Lütfen bir ülke seçin.'; statusEl.className='status error'; return; }
+  if(!city){ statusEl.textContent = 'Lütfen bir şehir / bölge girin.'; statusEl.className='status error'; return; }
+
+  statusEl.textContent = countryName + ', ' + city + ' için vakitler getiriliyor…';
+  statusEl.className = 'status';
+  goBtn.disabled = true;
+  cardsEl.classList.remove('show');
+  arcWrap.classList.remove('show');
+  nextBanner.classList.remove('show');
+  if(countdownTimer) clearInterval(countdownTimer);
+  if(sunTimer) clearInterval(sunTimer);
+
+  try{
+    const url = `https://api.aladhan.com/v1/timingsByCity?city=${encodeURIComponent(city)}&country=${encodeURIComponent(code)}&method=${method}`;
+    const res = await fetch(url);
+    if(!res.ok) throw new Error('network');
+    const data = await res.json();
+    if(data.code !== 200 || !data.data) throw new Error('bad response');
+
+    const t = data.data.timings;
+    const meta = data.data.meta;
+    const dateInfo = data.data.date;
+
+    const times = {};
+    PRAYER_ORDER.forEach(k=> times[k] = clean(t[k]));
+
+    renderHeaderDates(
+      dateInfo?.hijri ? `${dateInfo.hijri.day} ${dateInfo.hijri.month.en} ${dateInfo.hijri.year}` : null,
+      dateInfo?.gregorian ? `${dateInfo.gregorian.day} ${dateInfo.gregorian.month.en} ${dateInfo.gregorian.year}` : new Date().toLocaleDateString('tr-TR')
+    );
+
+    renderCards(times);
+    renderArc(times, meta.timezone);
+    startClock(times, meta.timezone);
+
+    statusEl.textContent = `${countryName} / ${city} — saat dilimi: ${meta.timezone}`;
+    statusEl.className = 'status';
+    cardsEl.classList.add('show');
+    arcWrap.classList.add('show');
+    nextBanner.classList.add('show');
+
+  }catch(err){
+    statusEl.textContent = 'Vakitler alınamadı. Şehir adını kontrol edip tekrar deneyin (örn. "Istanbul" ya da "Konya").';
+    statusEl.className = 'status error';
+  }finally{
+    goBtn.disabled = false;
+  }
+}
+
+function renderCards(times){
+  cardsEl.innerHTML = '';
+  PRAYER_ORDER.forEach(key=>{
+    const div = document.createElement('div');
+    div.className = 'arch';
+    div.dataset.key = key;
+    div.innerHTML = `<div class="pip"></div><div class="name">${PRAYER_LABEL[key]}</div><div class="time">${times[key]}</div>`;
+    cardsEl.appendChild(div);
+  });
+}
+
+function renderArc(times, tz){
+  arcMarkers.innerHTML = '';
+  const first = minutesOf(times.Imsak);
+  const last = minutesOf(times.Isha);
+  const span = Math.max(last - first, 1);
+
+  PRAYER_ORDER.forEach(key=>{
+    const pct = ((minutesOf(times[key]) - first) / span) * 100;
+    const m = document.createElement('div');
+    m.className = 'arc-marker';
+    m.dataset.key = key;
+    m.style.left = pct + '%';
+    m.innerHTML = `<div class="tag">${PRAYER_LABEL[key]}</div>`;
+    arcMarkers.appendChild(m);
+  });
+
+  window._arcMeta = {first, span};
+}
+
+function nowInZone(tz){
+  const fmt = new Intl.DateTimeFormat('en-GB', {timeZone: tz, hour:'2-digit', minute:'2-digit', hour12:false});
+  return fmt.format(new Date()); // HH:mm
+}
+
+function startClock(times, tz){
+  function tick(){
+    const nowStr = nowInZone(tz);
+    const nowMin = minutesOf(nowStr);
+
+    // find current & next prayer
+    let currentKey = null, nextKey = null;
+    for(let i=0;i<PRAYER_ORDER.length;i++){
+      const k = PRAYER_ORDER[i];
+      if(minutesOf(times[k]) <= nowMin){
+        currentKey = k;
+        nextKey = PRAYER_ORDER[i+1] || null;
+      }
+    }
+    if(!currentKey){
+      // before Imsak -> current is yesterday's Isha, next is Imsak
+      nextKey = PRAYER_ORDER[0];
+    }
+    if(!nextKey){
+      nextKey = PRAYER_ORDER[0]; // wraps to tomorrow's Imsak
+    }
+
+    // update cards highlight
+    document.querySelectorAll('.arch').forEach(el=>{
+      el.classList.toggle('current', el.dataset.key === currentKey);
+    });
+    document.querySelectorAll('.arc-marker').forEach(el=>{
+      el.classList.toggle('active', el.dataset.key === currentKey);
+    });
+
+    // next banner + countdown
+    let targetMin = minutesOf(times[nextKey]);
+    let diff = targetMin - nowMin;
+    if(diff <= 0) diff += 1440;
+    const h = Math.floor(diff/60), m = diff%60;
+    nextName.textContent = PRAYER_LABEL[nextKey];
+    nextCountdown.textContent = `${h} saat ${m} dakika kaldı`;
+
+    // sun position along arc
+    const {first, span} = window._arcMeta || {first:0, span:1};
+    let pct = ((nowMin - first) / span) * 100;
+    pct = Math.max(0, Math.min(100, pct));
+    arcSun.style.left = pct + '%';
+  }
+  tick();
+  countdownTimer = setInterval(tick, 30000);
+}
+
+goBtn.addEventListener('click', fetchTimes);
+cityInput.addEventListener('keydown', e=>{ if(e.key === 'Enter') fetchTimes(); });
+
+// initial load
+fetchTimes();
+</script>
+</body>
+</html>
